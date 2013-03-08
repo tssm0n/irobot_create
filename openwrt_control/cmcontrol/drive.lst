@@ -1,0 +1,253 @@
+   1               		.file	"drive.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.global	randomAngle
+  11               	randomAngle:
+  12               	/* prologue: function */
+  13               	/* frame size = 0 */
+  14 0000 0E94 0000 		call random
+  15 0004 20EA      		ldi r18,lo8(160)
+  16 0006 30E0      		ldi r19,hi8(160)
+  17 0008 40E0      		ldi r20,hlo8(160)
+  18 000a 50E0      		ldi r21,hhi8(160)
+  19 000c 0E94 0000 		call __divmodsi4
+  20 0010 9B01      		movw r18,r22
+  21 0012 AC01      		movw r20,r24
+  22 0014 2B5E      		subi r18,lo8(-(21))
+  23 0016 3F4F      		sbci r19,hi8(-(21))
+  24 0018 C901      		movw r24,r18
+  25               	/* epilogue start */
+  26 001a 0895      		ret
+  28               	.global	doDrive
+  30               	doDrive:
+  31 001c AF92      		push r10
+  32 001e BF92      		push r11
+  33 0020 CF92      		push r12
+  34 0022 DF92      		push r13
+  35 0024 EF92      		push r14
+  36 0026 FF92      		push r15
+  37 0028 0F93      		push r16
+  38 002a 1F93      		push r17
+  39 002c CF93      		push r28
+  40 002e DF93      		push r29
+  41               	/* prologue: function */
+  42               	/* frame size = 0 */
+  43 0030 80E0      		ldi r24,lo8(0)
+  44 0032 90E0      		ldi r25,hi8(0)
+  45 0034 60E0      		ldi r22,lo8(-32768)
+  46 0036 70E8      		ldi r23,hi8(-32768)
+  47 0038 0E94 0000 		call drive
+  48 003c 8EEE      		ldi r24,lo8(750)
+  49 003e 92E0      		ldi r25,hi8(750)
+  50 0040 0E94 0000 		call delayAndUpdateSensors
+  51 0044 00E0      		ldi r16,lo8(0)
+  52 0046 10E0      		ldi r17,hi8(0)
+  53 0048 CC24      		clr r12
+  54 004a C394      		inc r12
+  55 004c FF24      		clr r15
+  56 004e EE24      		clr r14
+  57 0050 DD24      		clr r13
+  58 0052 CCE2      		ldi r28,lo8(300)
+  59 0054 D1E0      		ldi r29,hi8(300)
+  60 0056 31E0      		ldi r19,lo8(1)
+  61 0058 A32E      		mov r10,r19
+  62 005a B12C      		mov r11,__zero_reg__
+  63               	.L20:
+  64 005c 8AE0      		ldi r24,lo8(10)
+  65 005e 90E0      		ldi r25,hi8(10)
+  66 0060 0E94 0000 		call delayAndUpdateSensors
+  67 0064 8DEF      		ldi r24,lo8(2813)
+  68 0066 9AE0      		ldi r25,hi8(2813)
+  69 0068 0E94 0000 		call delayAndUpdateSensors
+  70 006c 00C0      		rjmp .L4
+  71               	.L18:
+  72 006e 8238      		cpi r24,lo8(-126)
+  73 0070 01F4      		brne .L5
+  74 0072 CC59      		subi r28,lo8(-(100))
+  75 0074 DF4F      		sbci r29,hi8(-(100))
+  76 0076 21E0      		ldi r18,hi8(501)
+  77 0078 C53F      		cpi r28,lo8(501)
+  78 007a D207      		cpc r29,r18
+  79 007c 00F0      		brlo .L5
+  80 007e C4EF      		ldi r28,lo8(500)
+  81 0080 D1E0      		ldi r29,hi8(500)
+  82               	.L5:
+  83 0082 FF20      		tst r15
+  84 0084 01F0      		breq .L7
+  85 0086 EE20      		tst r14
+  86 0088 01F0      		breq .L8
+  87 008a 8091 0000 		lds r24,distance
+  88 008e 9091 0000 		lds r25,(distance)+1
+  89 0092 9095      		com r25
+  90 0094 8195      		neg r24
+  91 0096 9F4F      		sbci r25,lo8(-1)
+  92 0098 0697      		sbiw r24,6
+  93 009a 04F0      		brlt .L9
+  94 009c EE24      		clr r14
+  95               	.L9:
+  96 009e 8827      		clr r24
+  97 00a0 9927      		clr r25
+  98 00a2 8C1B      		sub r24,r28
+  99 00a4 9D0B      		sbc r25,r29
+ 100 00a6 00C0      		rjmp .L22
+ 101               	.L8:
+ 102 00a8 2091 0000 		lds r18,angle
+ 103 00ac 3091 0000 		lds r19,(angle)+1
+ 104 00b0 CC20      		tst r12
+ 105 00b2 01F0      		breq .L11
+ 106 00b4 0217      		cp r16,r18
+ 107 00b6 1307      		cpc r17,r19
+ 108 00b8 04F4      		brge .L12
+ 109 00ba FF24      		clr r15
+ 110               	.L12:
+ 111 00bc CE01      		movw r24,r28
+ 112 00be 61E0      		ldi r22,lo8(1)
+ 113 00c0 70E0      		ldi r23,hi8(1)
+ 114 00c2 00C0      		rjmp .L23
+ 115               	.L11:
+ 116 00c4 8827      		clr r24
+ 117 00c6 9927      		clr r25
+ 118 00c8 821B      		sub r24,r18
+ 119 00ca 930B      		sbc r25,r19
+ 120 00cc 0817      		cp r16,r24
+ 121 00ce 1907      		cpc r17,r25
+ 122 00d0 04F4      		brge .L13
+ 123 00d2 FF24      		clr r15
+ 124               	.L13:
+ 125 00d4 CE01      		movw r24,r28
+ 126 00d6 6FEF      		ldi r22,lo8(-1)
+ 127 00d8 7FEF      		ldi r23,hi8(-1)
+ 128 00da 00C0      		rjmp .L23
+ 129               	.L7:
+ 130 00dc DD20      		tst r13
+ 131 00de 01F0      		breq .L14
+ 132 00e0 8091 0000 		lds r24,sensors
+ 133 00e4 90E0      		ldi r25,lo8(0)
+ 134 00e6 9695      		lsr r25
+ 135 00e8 8795      		ror r24
+ 136 00ea 8A25      		eor r24,r10
+ 137 00ec 9B25      		eor r25,r11
+ 138 00ee CC24      		clr r12
+ 139 00f0 C394      		inc r12
+ 140 00f2 C822      		and r12,r24
+ 141 00f4 1092 0000 		sts (distance)+1,__zero_reg__
+ 142 00f8 1092 0000 		sts distance,__zero_reg__
+ 143 00fc 1092 0000 		sts (angle)+1,__zero_reg__
+ 144 0100 1092 0000 		sts angle,__zero_reg__
+ 145 0104 0E94 0000 		call randomAngle
+ 146 0108 8C01      		movw r16,r24
+ 147 010a FF24      		clr r15
+ 148 010c F394      		inc r15
+ 149 010e EE24      		clr r14
+ 150 0110 E394      		inc r14
+ 151 0112 00C0      		rjmp .L10
+ 152               	.L14:
+ 153 0114 8091 0000 		lds r24,customSensors
+ 154 0118 9091 0000 		lds r25,(customSensors)+1
+ 155 011c 8758      		subi r24,lo8(391)
+ 156 011e 9140      		sbci r25,hi8(391)
+ 157 0120 00F0      		brlo .L15
+ 158 0122 1092 0000 		sts (distance)+1,__zero_reg__
+ 159 0126 1092 0000 		sts distance,__zero_reg__
+ 160 012a 1092 0000 		sts (angle)+1,__zero_reg__
+ 161 012e 1092 0000 		sts angle,__zero_reg__
+ 162 0132 0E94 0000 		call randomAngle
+ 163 0136 8C01      		movw r16,r24
+ 164 0138 FF24      		clr r15
+ 165 013a F394      		inc r15
+ 166 013c 00C0      		rjmp .L10
+ 167               	.L15:
+ 168 013e CE01      		movw r24,r28
+ 169               	.L22:
+ 170 0140 60E0      		ldi r22,lo8(-32768)
+ 171 0142 70E8      		ldi r23,hi8(-32768)
+ 172               	.L23:
+ 173 0144 0E94 0000 		call drive
+ 174               	.L10:
+ 175 0148 82E3      		ldi r24,lo8(50)
+ 176 014a 90E0      		ldi r25,hi8(50)
+ 177 014c 0E94 0000 		call delayAndUpdateSensors
+ 178 0150 0E94 0000 		call isBumped
+ 179 0154 8111      		cpse r24,__zero_reg__
+ 180 0156 81E0      		ldi r24,lo8(1)
+ 181               	.L16:
+ 182 0158 D82E      		mov r13,r24
+ 183               	.L4:
+ 184 015a 4C9B      		sbis 41-32,4
+ 185 015c 00C0      		rjmp .L17
+ 186 015e 8091 0000 		lds r24,sensors+2
+ 187 0162 8823      		tst r24
+ 188 0164 01F4      		brne .L17
+ 189 0166 8091 0000 		lds r24,sensors+3
+ 190 016a 8823      		tst r24
+ 191 016c 01F4      		brne .L17
+ 192 016e 8091 0000 		lds r24,sensors+4
+ 193 0172 8823      		tst r24
+ 194 0174 01F4      		brne .L17
+ 195 0176 8091 0000 		lds r24,sensors+5
+ 196 017a 8823      		tst r24
+ 197 017c 01F4      		brne .L17
+ 198 017e 8091 0000 		lds r24,sensors+39
+ 199 0182 8823      		tst r24
+ 200 0184 01F4      		brne .L17
+ 201 0186 8091 0000 		lds r24,sensors+10
+ 202 018a 8938      		cpi r24,lo8(-119)
+ 203 018c 01F0      		breq .+2
+ 204 018e 00C0      		rjmp .L18
+ 205               	.L17:
+ 206 0190 80E0      		ldi r24,lo8(0)
+ 207 0192 90E0      		ldi r25,hi8(0)
+ 208 0194 60E0      		ldi r22,lo8(-32768)
+ 209 0196 70E8      		ldi r23,hi8(-32768)
+ 210 0198 0E94 0000 		call drive
+ 211 019c 8091 0000 		lds r24,sensors+10
+ 212 01a0 8938      		cpi r24,lo8(-119)
+ 213 01a2 01F4      		brne .L19
+ 214 01a4 80E0      		ldi r24,lo8(0)
+ 215 01a6 90E0      		ldi r25,hi8(0)
+ 216               	/* epilogue start */
+ 217 01a8 DF91      		pop r29
+ 218 01aa CF91      		pop r28
+ 219 01ac 1F91      		pop r17
+ 220 01ae 0F91      		pop r16
+ 221 01b0 FF90      		pop r15
+ 222 01b2 EF90      		pop r14
+ 223 01b4 DF90      		pop r13
+ 224 01b6 CF90      		pop r12
+ 225 01b8 BF90      		pop r11
+ 226 01ba AF90      		pop r10
+ 227 01bc 0895      		ret
+ 228               	.L19:
+ 229 01be 84EF      		ldi r24,lo8(500)
+ 230 01c0 91E0      		ldi r25,hi8(500)
+ 231 01c2 0E94 0000 		call delayAndUpdateSensors
+ 232 01c6 86E8      		ldi r24,lo8(2438)
+ 233 01c8 99E0      		ldi r25,hi8(2438)
+ 234 01ca 0E94 0000 		call delayAndUpdateSensors
+ 235 01ce 00C0      		rjmp .L20
+DEFINED SYMBOLS
+                            *ABS*:00000000 drive.c
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:2      *ABS*:0000003f __SREG__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:3      *ABS*:0000003e __SP_H__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:4      *ABS*:0000003d __SP_L__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:5      *ABS*:00000034 __CCP__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:6      *ABS*:00000000 __tmp_reg__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:7      *ABS*:00000001 __zero_reg__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:11     .text:00000000 randomAngle
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/ccrvsI31.s:30     .text:0000001c doDrive
+
+UNDEFINED SYMBOLS
+random
+__divmodsi4
+drive
+delayAndUpdateSensors
+distance
+angle
+sensors
+customSensors
+isBumped

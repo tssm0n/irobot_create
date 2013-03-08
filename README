@@ -1,0 +1,9 @@
+This project contains the source code for 3 different systems developed for controlling the iRobot create robotics platform.  
+
+openwrt_control:  This project uses a wireless router running the openwrt Linux distribution to control the create.  The router is connected to the create's command module, and has a Java GUI that can be used to control the robot over wifi.
+
+arduino_control_i2c:  An arduino is used to control the create through the command module via an i2c interface.  The command module has some basic functionality, such as reading commands from an IR Remote, and the arduino handles all of the additional sensors and intelligence.
+
+arduino_xbee_control:  The latest iteration uses an arduino directly connected to the serial interface on the create.  The arduino is connected to an xbee in order to receive commands via a wireless interface.
+
+

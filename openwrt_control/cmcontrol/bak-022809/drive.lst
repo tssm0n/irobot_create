@@ -1,0 +1,323 @@
+   1               		.file	"drive.c"
+   2               		.arch atmega168
+   3               	__SREG__ = 0x3f
+   4               	__SP_H__ = 0x3e
+   5               	__SP_L__ = 0x3d
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.text
+  11               	.global	randomAngle
+  13               	randomAngle:
+  14               	/* prologue: frame size=0 */
+  15               	/* prologue end (size=0) */
+  16 0000 0E94 0000 		call random
+  17 0004 DC01      		movw r26,r24
+  18 0006 CB01      		movw r24,r22
+  19 0008 9070      		andi r25,hi8(255)
+  20 000a 9695      		lsr r25
+  21 000c 8795      		ror r24
+  22 000e C596      		adiw r24,53
+  23               	/* epilogue: frame size=0 */
+  24 0010 0895      		ret
+  25               	/* epilogue end (size=1) */
+  26               	/* function randomAngle size 10 (9) */
+  28               	.global	doDrive
+  30               	doDrive:
+  31               	/* prologue: frame size=0 */
+  32 0012 BF92      		push r11
+  33 0014 CF92      		push r12
+  34 0016 DF92      		push r13
+  35 0018 EF92      		push r14
+  36 001a FF92      		push r15
+  37 001c 0F93      		push r16
+  38 001e 1F93      		push r17
+  39 0020 CF93      		push r28
+  40               	/* prologue end (size=8) */
+  41 0022 13E6      		ldi r17,lo8(99)
+  42 0024 C0E0      		ldi r28,lo8(0)
+  43 0026 01E0      		ldi r16,lo8(1)
+  44 0028 EE24      		clr r14
+  45 002a FF24      		clr r15
+  46 002c D02E      		mov r13,r16
+  47 002e CC2E      		mov r12,r28
+  48 0030 BC2E      		mov r11,r28
+  49 0032 60E0      		ldi r22,lo8(-32768)
+  50 0034 70E8      		ldi r23,hi8(-32768)
+  51 0036 C701      		movw r24,r14
+  52 0038 0E94 0000 		call drive
+  53 003c 8EEE      		ldi r24,lo8(750)
+  54 003e 92E0      		ldi r25,hi8(750)
+  55               	.L43:
+  56 0040 0E94 0000 		call delayAndUpdateSensors
+  57 0044 8AE0      		ldi r24,lo8(10)
+  58 0046 90E0      		ldi r25,hi8(10)
+  59 0048 0E94 0000 		call delayAndUpdateSensors
+  60 004c 1F5F      		subi r17,lo8(-(1))
+  61 004e 1436      		cpi r17,lo8(100)
+  62 0050 30F1      		brlo .L5
+  63 0052 10E0      		ldi r17,lo8(0)
+  64 0054 812F      		mov r24,r17
+  65 0056 0023      		tst r16
+  66 0058 09F4      		brne .L6
+  67 005a 81E0      		ldi r24,lo8(1)
+  68               	.L6:
+  69 005c 082F      		mov r16,r24
+  70 005e 8823      		tst r24
+  71 0060 79F0      		breq .L7
+  72 0062 8BE8      		ldi r24,lo8(-117)
+  73 0064 0E94 0000 		call byteTx
+  74 0068 8AE0      		ldi r24,lo8(10)
+  75 006a 0E94 0000 		call byteTx
+  76 006e 80E8      		ldi r24,lo8(-128)
+  77 0070 0E94 0000 		call byteTx
+  78 0074 8FEF      		ldi r24,lo8(-1)
+  79 0076 0E94 0000 		call byteTx
+  80 007a 8BB1      		in r24,43-0x20
+  81 007c 8066      		ori r24,lo8(96)
+  82 007e 0EC0      		rjmp .L44
+  83               	.L7:
+  84 0080 8BE8      		ldi r24,lo8(-117)
+  85 0082 0E94 0000 		call byteTx
+  86 0086 812F      		mov r24,r17
+  87 0088 0E94 0000 		call byteTx
+  88 008c 812F      		mov r24,r17
+  89 008e 0E94 0000 		call byteTx
+  90 0092 812F      		mov r24,r17
+  91 0094 0E94 0000 		call byteTx
+  92 0098 8BB1      		in r24,43-0x20
+  93 009a 8F79      		andi r24,lo8(-97)
+  94               	.L44:
+  95 009c 8BB9      		out 43-0x20,r24
+  96               	.L5:
+  97 009e 8DEF      		ldi r24,lo8(2813)
+  98 00a0 9AE0      		ldi r25,hi8(2813)
+  99 00a2 ABC0      		rjmp .L48
+ 100               	.L40:
+ 101 00a4 CC20      		tst r12
+ 102 00a6 51F1      		breq .L11
+ 103 00a8 BB20      		tst r11
+ 104 00aa 79F0      		breq .L12
+ 105 00ac 8091 0000 		lds r24,distance
+ 106 00b0 9091 0000 		lds r25,(distance)+1
+ 107 00b4 9095      		com r25
+ 108 00b6 8195      		neg r24
+ 109 00b8 9F4F      		sbci r25,lo8(-1)
+ 110 00ba 0697      		sbiw r24,6
+ 111 00bc 0CF0      		brlt .L13
+ 112 00be B22E      		mov r11,r18
+ 113               	.L13:
+ 114 00c0 60E0      		ldi r22,lo8(-32768)
+ 115 00c2 70E8      		ldi r23,hi8(-32768)
+ 116 00c4 88E3      		ldi r24,lo8(-200)
+ 117 00c6 9FEF      		ldi r25,hi8(-200)
+ 118 00c8 3BC0      		rjmp .L45
+ 119               	.L12:
+ 120 00ca 8091 0000 		lds r24,angle
+ 121 00ce 9091 0000 		lds r25,(angle)+1
+ 122 00d2 DD20      		tst r13
+ 123 00d4 39F0      		breq .L15
+ 124 00d6 E816      		cp r14,r24
+ 125 00d8 F906      		cpc r15,r25
+ 126 00da 0CF4      		brge .L16
+ 127 00dc CB2C      		mov r12,r11
+ 128               	.L16:
+ 129 00de 61E0      		ldi r22,lo8(1)
+ 130 00e0 70E0      		ldi r23,hi8(1)
+ 131 00e2 09C0      		rjmp .L49
+ 132               	.L15:
+ 133 00e4 9095      		com r25
+ 134 00e6 8195      		neg r24
+ 135 00e8 9F4F      		sbci r25,lo8(-1)
+ 136 00ea E816      		cp r14,r24
+ 137 00ec F906      		cpc r15,r25
+ 138 00ee 0CF4      		brge .L18
+ 139 00f0 CB2C      		mov r12,r11
+ 140               	.L18:
+ 141 00f2 6FEF      		ldi r22,lo8(-1)
+ 142 00f4 7FEF      		ldi r23,hi8(-1)
+ 143               	.L49:
+ 144 00f6 88EC      		ldi r24,lo8(200)
+ 145 00f8 90E0      		ldi r25,hi8(200)
+ 146 00fa 22C0      		rjmp .L45
+ 147               	.L11:
+ 148 00fc 8091 0000 		lds r24,sensors
+ 149 0100 282F      		mov r18,r24
+ 150 0102 3327      		clr r19
+ 151 0104 C901      		movw r24,r18
+ 152 0106 8370      		andi r24,lo8(3)
+ 153 0108 9070      		andi r25,hi8(3)
+ 154 010a 892B      		or r24,r25
+ 155 010c A9F0      		breq .L20
+ 156 010e 21FF      		sbrs r18,1
+ 157 0110 02C0      		rjmp .L21
+ 158 0112 DC2C      		mov r13,r12
+ 159 0114 02C0      		rjmp .L22
+ 160               	.L21:
+ 161 0116 41E0      		ldi r20,lo8(1)
+ 162 0118 D42E      		mov r13,r20
+ 163               	.L22:
+ 164 011a 31E0      		ldi r19,lo8(1)
+ 165 011c C32E      		mov r12,r19
+ 166 011e BC2C      		mov r11,r12
+ 167 0120 1092 0000 		sts (distance)+1,__zero_reg__
+ 168 0124 1092 0000 		sts distance,__zero_reg__
+ 169 0128 1092 0000 		sts (angle)+1,__zero_reg__
+ 170 012c 1092 0000 		sts angle,__zero_reg__
+ 171 0130 0E94 0000 		call randomAngle
+ 172 0134 7C01      		movw r14,r24
+ 173 0136 06C0      		rjmp .L19
+ 174               	.L20:
+ 175 0138 60E0      		ldi r22,lo8(-32768)
+ 176 013a 70E8      		ldi r23,hi8(-32768)
+ 177 013c 8CE2      		ldi r24,lo8(300)
+ 178 013e 91E0      		ldi r25,hi8(300)
+ 179               	.L45:
+ 180 0140 0E94 0000 		call drive
+ 181               	.L19:
+ 182 0144 1F5F      		subi r17,lo8(-(1))
+ 183 0146 1A30      		cpi r17,lo8(10)
+ 184 0148 08F4      		brsh .+2
+ 185 014a 55C0      		rjmp .L24
+ 186 014c 10E0      		ldi r17,lo8(0)
+ 187 014e CC20      		tst r12
+ 188 0150 31F0      		breq .L25
+ 189 0152 CC23      		tst r28
+ 190 0154 11F4      		brne .L26
+ 191 0156 C4E0      		ldi r28,lo8(4)
+ 192 0158 40C0      		rjmp .L42
+ 193               	.L26:
+ 194 015a C150      		subi r28,lo8(-(-1))
+ 195 015c 05C0      		rjmp .L28
+ 196               	.L25:
+ 197 015e C430      		cpi r28,lo8(4)
+ 198 0160 11F4      		brne .L29
+ 199 0162 CC2D      		mov r28,r12
+ 200 0164 03C0      		rjmp .L41
+ 201               	.L29:
+ 202 0166 CF5F      		subi r28,lo8(-(1))
+ 203               	.L28:
+ 204 0168 CC23      		tst r28
+ 205 016a 59F4      		brne .L31
+ 206               	.L41:
+ 207 016c 8BE8      		ldi r24,lo8(-117)
+ 208 016e 0E94 0000 		call byteTx
+ 209 0172 8C2F      		mov r24,r28
+ 210 0174 0E94 0000 		call byteTx
+ 211 0178 80E8      		ldi r24,lo8(-128)
+ 212 017a 0E94 0000 		call byteTx
+ 213 017e 8FEF      		ldi r24,lo8(-1)
+ 214 0180 13C0      		rjmp .L47
+ 215               	.L31:
+ 216 0182 C130      		cpi r28,lo8(1)
+ 217 0184 29F4      		brne .L33
+ 218 0186 8BE8      		ldi r24,lo8(-117)
+ 219 0188 0E94 0000 		call byteTx
+ 220 018c 82E0      		ldi r24,lo8(2)
+ 221 018e 06C0      		rjmp .L46
+ 222               	.L33:
+ 223 0190 C230      		cpi r28,lo8(2)
+ 224 0192 81F4      		brne .L35
+ 225 0194 8BE8      		ldi r24,lo8(-117)
+ 226 0196 0E94 0000 		call byteTx
+ 227 019a 88E0      		ldi r24,lo8(8)
+ 228               	.L46:
+ 229 019c 0E94 0000 		call byteTx
+ 230 01a0 80E0      		ldi r24,lo8(0)
+ 231 01a2 0E94 0000 		call byteTx
+ 232 01a6 80E0      		ldi r24,lo8(0)
+ 233               	.L47:
+ 234 01a8 0E94 0000 		call byteTx
+ 235 01ac 8BB1      		in r24,43-0x20
+ 236 01ae 8066      		ori r24,lo8(96)
+ 237 01b0 8BB9      		out 43-0x20,r24
+ 238 01b2 21C0      		rjmp .L24
+ 239               	.L35:
+ 240 01b4 C330      		cpi r28,lo8(3)
+ 241 01b6 79F4      		brne .L37
+ 242 01b8 8BE8      		ldi r24,lo8(-117)
+ 243 01ba 0E94 0000 		call byteTx
+ 244 01be 80E0      		ldi r24,lo8(0)
+ 245 01c0 0E94 0000 		call byteTx
+ 246 01c4 80E0      		ldi r24,lo8(0)
+ 247 01c6 0E94 0000 		call byteTx
+ 248 01ca 80E0      		ldi r24,lo8(0)
+ 249 01cc 0E94 0000 		call byteTx
+ 250 01d0 5E98      		cbi 43-0x20,6
+ 251 01d2 5D9A      		sbi 43-0x20,5
+ 252 01d4 10C0      		rjmp .L24
+ 253               	.L37:
+ 254 01d6 C430      		cpi r28,lo8(4)
+ 255 01d8 71F4      		brne .L24
+ 256               	.L42:
+ 257 01da 8BE8      		ldi r24,lo8(-117)
+ 258 01dc 0E94 0000 		call byteTx
+ 259 01e0 80E0      		ldi r24,lo8(0)
+ 260 01e2 0E94 0000 		call byteTx
+ 261 01e6 80E0      		ldi r24,lo8(0)
+ 262 01e8 0E94 0000 		call byteTx
+ 263 01ec 80E0      		ldi r24,lo8(0)
+ 264 01ee 0E94 0000 		call byteTx
+ 265 01f2 5D98      		cbi 43-0x20,5
+ 266 01f4 5E9A      		sbi 43-0x20,6
+ 267               	.L24:
+ 268 01f6 84E1      		ldi r24,lo8(20)
+ 269 01f8 90E0      		ldi r25,hi8(20)
+ 270               	.L48:
+ 271 01fa 0E94 0000 		call delayAndUpdateSensors
+ 272 01fe 4C9B      		sbis 41-0x20,4
+ 273 0200 15C0      		rjmp .L10
+ 274 0202 8091 0000 		lds r24,sensors+2
+ 275 0206 8823      		tst r24
+ 276 0208 89F4      		brne .L10
+ 277 020a 8091 0000 		lds r24,sensors+3
+ 278 020e 8823      		tst r24
+ 279 0210 69F4      		brne .L10
+ 280 0212 8091 0000 		lds r24,sensors+4
+ 281 0216 8823      		tst r24
+ 282 0218 49F4      		brne .L10
+ 283 021a 8091 0000 		lds r24,sensors+5
+ 284 021e 8823      		tst r24
+ 285 0220 29F4      		brne .L10
+ 286 0222 2091 0000 		lds r18,sensors+39
+ 287 0226 2223      		tst r18
+ 288 0228 09F4      		brne .+2
+ 289 022a 3CCF      		rjmp .L40
+ 290               	.L10:
+ 291 022c 60E0      		ldi r22,lo8(-32768)
+ 292 022e 70E8      		ldi r23,hi8(-32768)
+ 293 0230 80E0      		ldi r24,lo8(0)
+ 294 0232 90E0      		ldi r25,hi8(0)
+ 295 0234 0E94 0000 		call drive
+ 296 0238 84EF      		ldi r24,lo8(500)
+ 297 023a 91E0      		ldi r25,hi8(500)
+ 298 023c 0E94 0000 		call delayAndUpdateSensors
+ 299 0240 86E8      		ldi r24,lo8(2438)
+ 300 0242 99E0      		ldi r25,hi8(2438)
+ 301 0244 FDCE      		rjmp .L43
+ 302               	/* epilogue: frame size=0 */
+ 303               	/* epilogue: noreturn */
+ 304               	/* epilogue end (size=0) */
+ 305               	/* function doDrive size 283 (275) */
+ 307               	/* File "drive.c": code  293 = 0x0125 ( 284), prologues   8, epilogues   1 */
+DEFINED SYMBOLS
+                            *ABS*:00000000 drive.c
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:3      *ABS*:0000003f __SREG__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:4      *ABS*:0000003e __SP_H__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:5      *ABS*:0000003d __SP_L__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:6      *ABS*:00000000 __tmp_reg__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:7      *ABS*:00000001 __zero_reg__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:13     .text:00000000 randomAngle
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccAlaaaa.s:30     .text:00000012 doDrive
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
+random
+drive
+delayAndUpdateSensors
+byteTx
+distance
+angle
+sensors

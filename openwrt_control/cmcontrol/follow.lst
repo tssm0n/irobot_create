@@ -1,0 +1,199 @@
+   1               		.file	"follow.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.global	doFollow
+  11               	doFollow:
+  12 0000 FF92      		push r15
+  13 0002 0F93      		push r16
+  14 0004 1F93      		push r17
+  15 0006 CF93      		push r28
+  16 0008 DF93      		push r29
+  17               	/* prologue: function */
+  18               	/* frame size = 0 */
+  19 000a 80E0      		ldi r24,lo8(0)
+  20 000c 90E0      		ldi r25,hi8(0)
+  21 000e 60E0      		ldi r22,lo8(-32768)
+  22 0010 70E8      		ldi r23,hi8(-32768)
+  23 0012 0E94 0000 		call drive
+  24 0016 8EEE      		ldi r24,lo8(750)
+  25 0018 92E0      		ldi r25,hi8(750)
+  26 001a 0E94 0000 		call delayAndUpdateSensors
+  27 001e C0E0      		ldi r28,lo8(0)
+  28 0020 D0E0      		ldi r29,hi8(0)
+  29 0022 00E0      		ldi r16,lo8(0)
+  30 0024 FF24      		clr r15
+  31 0026 10E0      		ldi r17,lo8(0)
+  32               	.L18:
+  33 0028 8AE0      		ldi r24,lo8(10)
+  34 002a 90E0      		ldi r25,hi8(10)
+  35 002c 0E94 0000 		call delayAndUpdateSensors
+  36 0030 84EF      		ldi r24,lo8(500)
+  37 0032 91E0      		ldi r25,hi8(500)
+  38 0034 0E94 0000 		call delayAndUpdateSensors
+  39 0038 00C0      		rjmp .L22
+  40               	.L16:
+  41 003a 0023      		tst r16
+  42 003c 01F0      		breq .L3
+  43 003e FF20      		tst r15
+  44 0040 01F0      		breq .L4
+  45 0042 8091 0000 		lds r24,distance
+  46 0046 9091 0000 		lds r25,(distance)+1
+  47 004a 9095      		com r25
+  48 004c 8195      		neg r24
+  49 004e 9F4F      		sbci r25,lo8(-1)
+  50 0050 0697      		sbiw r24,6
+  51 0052 04F0      		brlt .L5
+  52 0054 FF24      		clr r15
+  53               	.L5:
+  54 0056 88E3      		ldi r24,lo8(-200)
+  55 0058 9FEF      		ldi r25,hi8(-200)
+  56 005a 00C0      		rjmp .L23
+  57               	.L4:
+  58 005c 8091 0000 		lds r24,angle
+  59 0060 9091 0000 		lds r25,(angle)+1
+  60 0064 C817      		cp r28,r24
+  61 0066 D907      		cpc r29,r25
+  62 0068 04F4      		brge .L7
+  63 006a 00E0      		ldi r16,lo8(0)
+  64               	.L7:
+  65 006c 88EC      		ldi r24,lo8(200)
+  66 006e 90E0      		ldi r25,hi8(200)
+  67 0070 61E0      		ldi r22,lo8(1)
+  68 0072 70E0      		ldi r23,hi8(1)
+  69 0074 00C0      		rjmp .L24
+  70               	.L3:
+  71 0076 1123      		tst r17
+  72 0078 01F0      		breq .L8
+  73 007a 8091 0000 		lds r24,sensors
+  74 007e 90E0      		ldi r25,lo8(0)
+  75 0080 8370      		andi r24,lo8(3)
+  76 0082 9070      		andi r25,hi8(3)
+  77 0084 892B      		or r24,r25
+  78 0086 01F0      		breq .L9
+  79 0088 FF24      		clr r15
+  80 008a F394      		inc r15
+  81               	.L9:
+  82 008c 1092 0000 		sts (distance)+1,__zero_reg__
+  83 0090 1092 0000 		sts distance,__zero_reg__
+  84 0094 1092 0000 		sts (angle)+1,__zero_reg__
+  85 0098 1092 0000 		sts angle,__zero_reg__
+  86 009c CEE1      		ldi r28,lo8(30)
+  87 009e D0E0      		ldi r29,hi8(30)
+  88 00a0 01E0      		ldi r16,lo8(1)
+  89 00a2 00C0      		rjmp .L6
+  90               	.L8:
+  91 00a4 8091 0000 		lds r24,customSensors
+  92 00a8 9091 0000 		lds r25,(customSensors)+1
+  93 00ac 8B3F      		cpi r24,251
+  94 00ae 9105      		cpc r25,__zero_reg__
+  95 00b0 00F0      		brlo .L10
+  96 00b2 21E0      		ldi r18,hi8(476)
+  97 00b4 8C3D      		cpi r24,lo8(476)
+  98 00b6 9207      		cpc r25,r18
+  99 00b8 00F0      		brlo .L11
+ 100 00ba 8CE2      		ldi r24,lo8(300)
+ 101 00bc 91E0      		ldi r25,hi8(300)
+ 102 00be 60E4      		ldi r22,lo8(1600)
+ 103 00c0 76E0      		ldi r23,hi8(1600)
+ 104 00c2 00C0      		rjmp .L24
+ 105               	.L11:
+ 106 00c4 8857      		subi r24,lo8(376)
+ 107 00c6 9140      		sbci r25,hi8(376)
+ 108 00c8 00F4      		brsh .L10
+ 109               	.L12:
+ 110 00ca 8CE2      		ldi r24,lo8(300)
+ 111 00cc 91E0      		ldi r25,hi8(300)
+ 112 00ce 60EC      		ldi r22,lo8(-1600)
+ 113 00d0 79EF      		ldi r23,hi8(-1600)
+ 114 00d2 00C0      		rjmp .L24
+ 115               	.L10:
+ 116 00d4 8CE2      		ldi r24,lo8(300)
+ 117 00d6 91E0      		ldi r25,hi8(300)
+ 118               	.L23:
+ 119 00d8 60E0      		ldi r22,lo8(-32768)
+ 120 00da 70E8      		ldi r23,hi8(-32768)
+ 121               	.L24:
+ 122 00dc 0E94 0000 		call drive
+ 123               	.L6:
+ 124 00e0 82E3      		ldi r24,lo8(50)
+ 125 00e2 90E0      		ldi r25,hi8(50)
+ 126 00e4 0E94 0000 		call delayAndUpdateSensors
+ 127 00e8 8091 0000 		lds r24,sensors
+ 128 00ec 90E0      		ldi r25,lo8(0)
+ 129 00ee 8370      		andi r24,lo8(3)
+ 130 00f0 9070      		andi r25,hi8(3)
+ 131 00f2 892B      		or r24,r25
+ 132 00f4 01F4      		brne .L25
+ 133               	.L13:
+ 134 00f6 10E0      		ldi r17,lo8(0)
+ 135 00f8 8091 0000 		lds r24,customSensors+2
+ 136 00fc 9091 0000 		lds r25,(customSensors+2)+1
+ 137 0100 0D97      		sbiw r24,13
+ 138 0102 00F4      		brsh .L22
+ 139               	.L25:
+ 140 0104 11E0      		ldi r17,lo8(1)
+ 141               	.L22:
+ 142 0106 4C9B      		sbis 41-32,4
+ 143 0108 00C0      		rjmp .L15
+ 144 010a 8091 0000 		lds r24,sensors+2
+ 145 010e 8823      		tst r24
+ 146 0110 01F4      		brne .L15
+ 147 0112 8091 0000 		lds r24,sensors+3
+ 148 0116 8823      		tst r24
+ 149 0118 01F4      		brne .L15
+ 150 011a 8091 0000 		lds r24,sensors+4
+ 151 011e 8823      		tst r24
+ 152 0120 01F4      		brne .L15
+ 153 0122 8091 0000 		lds r24,sensors+5
+ 154 0126 8823      		tst r24
+ 155 0128 01F4      		brne .L15
+ 156 012a 8091 0000 		lds r24,sensors+39
+ 157 012e 8823      		tst r24
+ 158 0130 01F4      		brne .L15
+ 159 0132 8091 0000 		lds r24,sensors+10
+ 160 0136 8938      		cpi r24,lo8(-119)
+ 161 0138 01F0      		breq .+2
+ 162 013a 00C0      		rjmp .L16
+ 163               	.L15:
+ 164 013c 80E0      		ldi r24,lo8(0)
+ 165 013e 90E0      		ldi r25,hi8(0)
+ 166 0140 60E0      		ldi r22,lo8(-32768)
+ 167 0142 70E8      		ldi r23,hi8(-32768)
+ 168 0144 0E94 0000 		call drive
+ 169 0148 8091 0000 		lds r24,sensors+10
+ 170 014c 8938      		cpi r24,lo8(-119)
+ 171 014e 01F0      		breq .L19
+ 172 0150 86E8      		ldi r24,lo8(2438)
+ 173 0152 99E0      		ldi r25,hi8(2438)
+ 174 0154 0E94 0000 		call delayAndUpdateSensors
+ 175 0158 00C0      		rjmp .L18
+ 176               	.L19:
+ 177               	/* epilogue start */
+ 178 015a DF91      		pop r29
+ 179 015c CF91      		pop r28
+ 180 015e 1F91      		pop r17
+ 181 0160 0F91      		pop r16
+ 182 0162 FF90      		pop r15
+ 183 0164 0895      		ret
+DEFINED SYMBOLS
+                            *ABS*:00000000 follow.c
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:2      *ABS*:0000003f __SREG__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:3      *ABS*:0000003e __SP_H__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:4      *ABS*:0000003d __SP_L__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:5      *ABS*:00000034 __CCP__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:6      *ABS*:00000000 __tmp_reg__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:7      *ABS*:00000001 __zero_reg__
+C:\DOCUME~1\kshaw\LOCALS~1\Temp/cc2XaOjm.s:11     .text:00000000 doFollow
+
+UNDEFINED SYMBOLS
+drive
+delayAndUpdateSensors
+distance
+angle
+sensors
+customSensors

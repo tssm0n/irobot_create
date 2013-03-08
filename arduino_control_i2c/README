@@ -1,0 +1,2 @@
+This project uses an arduino to control the create through an i2c interface with the command module.  The command module interface with the create, and also provides some basic controls such as diving via the IR remote.  The arduino handles more complex functions, such as reading additional sensors and moving the servo holding the proximity sensor.
+

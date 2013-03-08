@@ -1,0 +1,10 @@
+bin_PROGRAMS = robotcontrol
+robotcontrol_SOURCES = controlprogram.cpp irobotcontrol.cpp irobotserial.cpp \
+	remotecontrol.cpp sensordata.cpp
+
+# set the include path found by configure
+INCLUDES= $(all_includes)
+
+# the library search path.
+robotcontrol_LDFLAGS = $(all_libraries) -lpthreads
+noinst_HEADERS = controlprogram.h remotecontrol.h

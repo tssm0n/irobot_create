@@ -1,0 +1,877 @@
+   1               		.file	"cm9600.c"
+   2               		.arch atmega168
+   3               	__SREG__ = 0x3f
+   4               	__SP_H__ = 0x3e
+   5               	__SP_L__ = 0x3d
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.lcomm gXringNdx,3
+  11               		.data
+  14               	gBitnum:
+  15 0000 01        		.byte	1
+  16 0001 01        		.byte	1
+  17 0002 01        		.byte	1
+  18               		.lcomm gXmtState,3
+  19               		.lcomm gRhead,3
+  20               		.lcomm gPortBit,3
+  23               	gRcvrEnabled:
+  24 0003 01        		.byte	1
+  25 0004 01        		.byte	1
+  26 0005 01        		.byte	1
+  27               		.lcomm gBaudRate,3
+  28               		.lcomm gPortsOpen,1
+  29               		.lcomm gRtail,3
+  30               		.text
+  31               	.global	cm_rcv_enable
+  33               	cm_rcv_enable:
+  34               	/* prologue: frame size=0 */
+  35               	/* prologue end (size=0) */
+  36 0000 E0E0      		ldi r30,lo8(gRcvrEnabled)
+  37 0002 F0E0      		ldi r31,hi8(gRcvrEnabled)
+  38 0004 E80F      		add r30,r24
+  39 0006 F11D      		adc r31,__zero_reg__
+  40 0008 81E0      		ldi r24,lo8(1)
+  41 000a 8083      		st Z,r24
+  42               	/* epilogue: frame size=0 */
+  43 000c 0895      		ret
+  44               	/* epilogue end (size=1) */
+  45               	/* function cm_rcv_enable size 7 (6) */
+  47               	.global	cm_init_UART
+  49               	cm_init_UART:
+  50               	/* prologue: frame size=0 */
+  51               	/* prologue end (size=0) */
+  52 000e 9927      		clr r25
+  53 0010 8230      		cpi r24,2
+  54 0012 9105      		cpc r25,__zero_reg__
+  55 0014 81F0      		breq .L5
+  56 0016 8330      		cpi r24,3
+  57 0018 9105      		cpc r25,__zero_reg__
+  58 001a 1CF4      		brge .L8
+  59 001c 892B      		or r24,r25
+  60 001e 99F0      		breq .L6
+  61 0020 1AC0      		rjmp .L7
+  62               	.L8:
+  63 0022 0397      		sbiw r24,3
+  64 0024 C1F4      		brne .L7
+  65 0026 8091 0000 		lds r24,gPortsOpen
+  66 002a E82F      		mov r30,r24
+  67 002c FF27      		clr r31
+  68 002e E050      		subi r30,lo8(-(gPortBit))
+  69 0030 F040      		sbci r31,hi8(-(gPortBit))
+  70 0032 83E0      		ldi r24,lo8(3)
+  71 0034 17C0      		rjmp .L10
+  72               	.L5:
+  73 0036 8091 0000 		lds r24,gPortsOpen
+  74 003a E82F      		mov r30,r24
+  75 003c FF27      		clr r31
+  76 003e E050      		subi r30,lo8(-(gPortBit))
+  77 0040 F040      		sbci r31,hi8(-(gPortBit))
+  78 0042 82E0      		ldi r24,lo8(2)
+  79 0044 0FC0      		rjmp .L10
+  80               	.L6:
+  81 0046 8091 0000 		lds r24,gPortsOpen
+  82 004a E82F      		mov r30,r24
+  83 004c FF27      		clr r31
+  84 004e E050      		subi r30,lo8(-(gPortBit))
+  85 0050 F040      		sbci r31,hi8(-(gPortBit))
+  86 0052 1082      		st Z,__zero_reg__
+  87 0054 08C0      		rjmp .L3
+  88               	.L7:
+  89 0056 8091 0000 		lds r24,gPortsOpen
+  90 005a E82F      		mov r30,r24
+  91 005c FF27      		clr r31
+  92 005e E050      		subi r30,lo8(-(gPortBit))
+  93 0060 F040      		sbci r31,hi8(-(gPortBit))
+  94 0062 81E0      		ldi r24,lo8(1)
+  95               	.L10:
+  96 0064 8083      		st Z,r24
+  97               	.L3:
+  98 0066 8091 0000 		lds r24,gPortsOpen
+  99 006a E82F      		mov r30,r24
+ 100 006c FF27      		clr r31
+ 101 006e E050      		subi r30,lo8(-(gBaudRate))
+ 102 0070 F040      		sbci r31,hi8(-(gBaudRate))
+ 103 0072 6083      		st Z,r22
+ 104 0074 8091 0000 		lds r24,gPortsOpen
+ 105 0078 E82F      		mov r30,r24
+ 106 007a FF27      		clr r31
+ 107 007c E050      		subi r30,lo8(-(gXringNdx))
+ 108 007e F040      		sbci r31,hi8(-(gXringNdx))
+ 109 0080 1082      		st Z,__zero_reg__
+ 110 0082 8091 0000 		lds r24,gPortsOpen
+ 111 0086 E82F      		mov r30,r24
+ 112 0088 FF27      		clr r31
+ 113 008a E050      		subi r30,lo8(-(gXmtState))
+ 114 008c F040      		sbci r31,hi8(-(gXmtState))
+ 115 008e 1082      		st Z,__zero_reg__
+ 116 0090 8091 0000 		lds r24,gPortsOpen
+ 117 0094 E82F      		mov r30,r24
+ 118 0096 FF27      		clr r31
+ 119 0098 E050      		subi r30,lo8(-(gBitnum))
+ 120 009a F040      		sbci r31,hi8(-(gBitnum))
+ 121 009c 81E0      		ldi r24,lo8(1)
+ 122 009e 8083      		st Z,r24
+ 123 00a0 8091 0000 		lds r24,gPortsOpen
+ 124 00a4 E82F      		mov r30,r24
+ 125 00a6 FF27      		clr r31
+ 126 00a8 E050      		subi r30,lo8(-(gRhead))
+ 127 00aa F040      		sbci r31,hi8(-(gRhead))
+ 128 00ac 1082      		st Z,__zero_reg__
+ 129 00ae 8091 0000 		lds r24,gPortsOpen
+ 130 00b2 E82F      		mov r30,r24
+ 131 00b4 FF27      		clr r31
+ 132 00b6 E050      		subi r30,lo8(-(gRtail))
+ 133 00b8 F040      		sbci r31,hi8(-(gRtail))
+ 134 00ba 1082      		st Z,__zero_reg__
+ 135 00bc 8091 0000 		lds r24,gPortsOpen
+ 136 00c0 0E94 0000 		call cm_rcv_enable
+ 137               	/* #APP */
+ 138 00c4 F894      		cli
+ 139               	/* #NOAPP */
+ 140 00c6 8091 0000 		lds r24,gPortsOpen
+ 141 00ca E82F      		mov r30,r24
+ 142 00cc FF27      		clr r31
+ 143 00ce E050      		subi r30,lo8(-(gPortBit))
+ 144 00d0 F040      		sbci r31,hi8(-(gPortBit))
+ 145 00d2 8081      		ld r24,Z
+ 146 00d4 41E0      		ldi r20,lo8(1)
+ 147 00d6 50E0      		ldi r21,hi8(1)
+ 148 00d8 9A01      		movw r18,r20
+ 149 00da 02C0      		rjmp 2f
+ 150 00dc 220F      	1:	lsl r18
+ 151 00de 331F      		rol r19
+ 152 00e0 8A95      	2:	dec r24
+ 153 00e2 E2F7      		brpl 1b
+ 154 00e4 84B1      		in r24,36-0x20
+ 155 00e6 822B      		or r24,r18
+ 156 00e8 84B9      		out 36-0x20,r24
+ 157 00ea 8091 0000 		lds r24,gPortsOpen
+ 158 00ee E82F      		mov r30,r24
+ 159 00f0 FF27      		clr r31
+ 160 00f2 E050      		subi r30,lo8(-(gPortBit))
+ 161 00f4 F040      		sbci r31,hi8(-(gPortBit))
+ 162 00f6 8081      		ld r24,Z
+ 163 00f8 9A01      		movw r18,r20
+ 164 00fa 02C0      		rjmp 2f
+ 165 00fc 220F      	1:	lsl r18
+ 166 00fe 331F      		rol r19
+ 167 0100 8A95      	2:	dec r24
+ 168 0102 E2F7      		brpl 1b
+ 169 0104 85B1      		in r24,37-0x20
+ 170 0106 822B      		or r24,r18
+ 171 0108 85B9      		out 37-0x20,r24
+ 172 010a 8091 0000 		lds r24,gPortsOpen
+ 173 010e E82F      		mov r30,r24
+ 174 0110 FF27      		clr r31
+ 175 0112 E050      		subi r30,lo8(-(gPortBit))
+ 176 0114 F040      		sbci r31,hi8(-(gPortBit))
+ 177 0116 8081      		ld r24,Z
+ 178 0118 9A01      		movw r18,r20
+ 179 011a 02C0      		rjmp 2f
+ 180 011c 220F      	1:	lsl r18
+ 181 011e 331F      		rol r19
+ 182 0120 8A95      	2:	dec r24
+ 183 0122 E2F7      		brpl 1b
+ 184 0124 9FE3      		ldi r25,lo8(63)
+ 185 0126 9227      		eor r25,r18
+ 186 0128 8091 7E00 		lds r24,126
+ 187 012c 8923      		and r24,r25
+ 188 012e 8093 7E00 		sts 126,r24
+ 189 0132 8091 0000 		lds r24,gPortsOpen
+ 190 0136 E82F      		mov r30,r24
+ 191 0138 FF27      		clr r31
+ 192 013a E050      		subi r30,lo8(-(gPortBit))
+ 193 013c F040      		sbci r31,hi8(-(gPortBit))
+ 194 013e 8081      		ld r24,Z
+ 195 0140 9A01      		movw r18,r20
+ 196 0142 02C0      		rjmp 2f
+ 197 0144 220F      	1:	lsl r18
+ 198 0146 331F      		rol r19
+ 199 0148 8A95      	2:	dec r24
+ 200 014a E2F7      		brpl 1b
+ 201 014c 922F      		mov r25,r18
+ 202 014e 9095      		com r25
+ 203 0150 87B1      		in r24,39-0x20
+ 204 0152 8923      		and r24,r25
+ 205 0154 87B9      		out 39-0x20,r24
+ 206 0156 8091 0000 		lds r24,gPortsOpen
+ 207 015a E82F      		mov r30,r24
+ 208 015c FF27      		clr r31
+ 209 015e E050      		subi r30,lo8(-(gPortBit))
+ 210 0160 F040      		sbci r31,hi8(-(gPortBit))
+ 211 0162 8081      		ld r24,Z
+ 212 0164 02C0      		rjmp 2f
+ 213 0166 440F      	1:	lsl r20
+ 214 0168 551F      		rol r21
+ 215 016a 8A95      	2:	dec r24
+ 216 016c E2F7      		brpl 1b
+ 217 016e 88B1      		in r24,40-0x20
+ 218 0170 842B      		or r24,r20
+ 219 0172 88B9      		out 40-0x20,r24
+ 220 0174 2091 0000 		lds r18,gPortsOpen
+ 221 0178 2223      		tst r18
+ 222 017a 69F4      		brne .L9
+ 223 017c 82E0      		ldi r24,lo8(2)
+ 224 017e 8093 B000 		sts 176,r24
+ 225 0182 99E0      		ldi r25,lo8(9)
+ 226 0184 9093 B300 		sts 179,r25
+ 227 0188 2093 B200 		sts 178,r18
+ 228 018c 93E0      		ldi r25,lo8(3)
+ 229 018e 9093 B100 		sts 177,r25
+ 230 0192 8093 7000 		sts 112,r24
+ 231               	.L9:
+ 232 0196 8091 0000 		lds r24,gPortsOpen
+ 233 019a 8F5F      		subi r24,lo8(-(1))
+ 234 019c 8093 0000 		sts gPortsOpen,r24
+ 235               	/* #APP */
+ 236 01a0 7894      		sei
+ 237               	/* #NOAPP */
+ 238 01a2 8091 0000 		lds r24,gPortsOpen
+ 239 01a6 8150      		subi r24,lo8(-(-1))
+ 240 01a8 9927      		clr r25
+ 241               	/* epilogue: frame size=0 */
+ 242 01aa 0895      		ret
+ 243               	/* epilogue end (size=1) */
+ 244               	/* function cm_init_UART size 215 (214) */
+ 246               	.global	cm_UART_busy
+ 248               	cm_UART_busy:
+ 249               	/* prologue: frame size=0 */
+ 250               	/* prologue end (size=0) */
+ 251 01ac 20E0      		ldi r18,lo8(0)
+ 252 01ae 30E0      		ldi r19,hi8(0)
+ 253 01b0 E82F      		mov r30,r24
+ 254 01b2 FF27      		clr r31
+ 255 01b4 E050      		subi r30,lo8(-(gXmtState))
+ 256 01b6 F040      		sbci r31,hi8(-(gXmtState))
+ 257 01b8 8081      		ld r24,Z
+ 258 01ba 8823      		tst r24
+ 259 01bc 11F0      		breq .L12
+ 260 01be 21E0      		ldi r18,lo8(1)
+ 261 01c0 30E0      		ldi r19,hi8(1)
+ 262               	.L12:
+ 263 01c2 C901      		movw r24,r18
+ 264               	/* epilogue: frame size=0 */
+ 265 01c4 0895      		ret
+ 266               	/* epilogue end (size=1) */
+ 267               	/* function cm_UART_busy size 13 (12) */
+ 269               	.global	cm_ByteXmt
+ 271               	cm_ByteXmt:
+ 272               	/* prologue: frame size=0 */
+ 273 01c6 1F93      		push r17
+ 274 01c8 CF93      		push r28
+ 275               	/* prologue end (size=2) */
+ 276 01ca C82F      		mov r28,r24
+ 277 01cc 162F      		mov r17,r22
+ 278               	/* #APP */
+ 279 01ce 7894      		sei
+ 280               	/* #NOAPP */
+ 281 01d0 01C0      		rjmp .L14
+ 282               	.L16:
+ 283               	/* #APP */
+ 284 01d2 0000      		nop
+ 285               	/* #NOAPP */
+ 286               	.L14:
+ 287 01d4 8C2F      		mov r24,r28
+ 288 01d6 0E94 0000 		call cm_UART_busy
+ 289 01da 8823      		tst r24
+ 290 01dc D1F7      		brne .L16
+ 291               	/* #APP */
+ 292 01de F894      		cli
+ 293               	/* #NOAPP */
+ 294 01e0 EC2F      		mov r30,r28
+ 295 01e2 FF27      		clr r31
+ 296 01e4 DF01      		movw r26,r30
+ 297 01e6 A050      		subi r26,lo8(-(gUartXmt))
+ 298 01e8 B040      		sbci r27,hi8(-(gUartXmt))
+ 299 01ea 1C93      		st X,r17
+ 300 01ec E050      		subi r30,lo8(-(gXmtState))
+ 301 01ee F040      		sbci r31,hi8(-(gXmtState))
+ 302 01f0 81E0      		ldi r24,lo8(1)
+ 303 01f2 8083      		st Z,r24
+ 304               	/* #APP */
+ 305 01f4 7894      		sei
+ 306               	/* #NOAPP */
+ 307               	/* epilogue: frame size=0 */
+ 308 01f6 CF91      		pop r28
+ 309 01f8 1F91      		pop r17
+ 310 01fa 0895      		ret
+ 311               	/* epilogue end (size=3) */
+ 312               	/* function cm_ByteXmt size 31 (26) */
+ 314               	.global	cm_send_line
+ 316               	cm_send_line:
+ 317               	/* prologue: frame size=0 */
+ 318 01fc 0F93      		push r16
+ 319 01fe 1F93      		push r17
+ 320 0200 CF93      		push r28
+ 321 0202 DF93      		push r29
+ 322               	/* prologue end (size=4) */
+ 323 0204 182F      		mov r17,r24
+ 324 0206 EB01      		movw r28,r22
+ 325 0208 00E0      		ldi r16,lo8(0)
+ 326               	/* #APP */
+ 327 020a 7894      		sei
+ 328               	/* #NOAPP */
+ 329 020c 01C0      		rjmp .L18
+ 330               	.L20:
+ 331               	/* #APP */
+ 332 020e 0000      		nop
+ 333               	/* #NOAPP */
+ 334               	.L18:
+ 335 0210 812F      		mov r24,r17
+ 336 0212 0E94 0000 		call cm_UART_busy
+ 337 0216 8823      		tst r24
+ 338 0218 D1F7      		brne .L20
+ 339 021a A12F      		mov r26,r17
+ 340 021c BB27      		clr r27
+ 341 021e FD01      		movw r30,r26
+ 342 0220 EA0F      		add r30,r26
+ 343 0222 FB1F      		adc r31,r27
+ 344 0224 E050      		subi r30,lo8(-(gXring))
+ 345 0226 F040      		sbci r31,hi8(-(gXring))
+ 346 0228 9E01      		movw r18,r28
+ 347 022a 2F5F      		subi r18,lo8(-(1))
+ 348 022c 3F4F      		sbci r19,hi8(-(1))
+ 349 022e 3183      		std Z+1,r19
+ 350 0230 2083      		st Z,r18
+ 351 0232 8981      		ldd r24,Y+1
+ 352               	.L26:
+ 353 0234 8823      		tst r24
+ 354 0236 31F0      		breq .L25
+ 355 0238 0F5F      		subi r16,lo8(-(1))
+ 356 023a F901      		movw r30,r18
+ 357 023c E00F      		add r30,r16
+ 358 023e F11D      		adc r31,__zero_reg__
+ 359 0240 8081      		ld r24,Z
+ 360 0242 F8CF      		rjmp .L26
+ 361               	.L25:
+ 362               	/* #APP */
+ 363 0244 F894      		cli
+ 364               	/* #NOAPP */
+ 365 0246 FD01      		movw r30,r26
+ 366 0248 E050      		subi r30,lo8(-(gXringNdx))
+ 367 024a F040      		sbci r31,hi8(-(gXringNdx))
+ 368 024c 0083      		st Z,r16
+ 369 024e FD01      		movw r30,r26
+ 370 0250 E050      		subi r30,lo8(-(gUartXmt))
+ 371 0252 F040      		sbci r31,hi8(-(gUartXmt))
+ 372 0254 8881      		ld r24,Y
+ 373 0256 8083      		st Z,r24
+ 374 0258 A050      		subi r26,lo8(-(gXmtState))
+ 375 025a B040      		sbci r27,hi8(-(gXmtState))
+ 376 025c 81E0      		ldi r24,lo8(1)
+ 377 025e 8C93      		st X,r24
+ 378               	/* #APP */
+ 379 0260 7894      		sei
+ 380               	/* #NOAPP */
+ 381               	/* epilogue: frame size=0 */
+ 382 0262 DF91      		pop r29
+ 383 0264 CF91      		pop r28
+ 384 0266 1F91      		pop r17
+ 385 0268 0F91      		pop r16
+ 386 026a 0895      		ret
+ 387               	/* epilogue end (size=5) */
+ 388               	/* function cm_send_line size 60 (51) */
+ 390               	.global	cm_char_rdy
+ 392               	cm_char_rdy:
+ 393               	/* prologue: frame size=0 */
+ 394               	/* prologue end (size=0) */
+ 395 026c 9927      		clr r25
+ 396 026e DC01      		movw r26,r24
+ 397 0270 A050      		subi r26,lo8(-(gRhead))
+ 398 0272 B040      		sbci r27,hi8(-(gRhead))
+ 399 0274 FC01      		movw r30,r24
+ 400 0276 E050      		subi r30,lo8(-(gRtail))
+ 401 0278 F040      		sbci r31,hi8(-(gRtail))
+ 402 027a 9C91      		ld r25,X
+ 403 027c 8081      		ld r24,Z
+ 404 027e 9817      		cp r25,r24
+ 405 0280 28F0      		brlo .L28
+ 406 0282 8C91      		ld r24,X
+ 407 0284 9081      		ld r25,Z
+ 408 0286 891B      		sub r24,r25
+ 409 0288 9927      		clr r25
+ 410 028a 0895      		ret
+ 411               	.L28:
+ 412 028c 8081      		ld r24,Z
+ 413 028e 9C91      		ld r25,X
+ 414 0290 891B      		sub r24,r25
+ 415 0292 90E1      		ldi r25,lo8(16)
+ 416 0294 981B      		sub r25,r24
+ 417 0296 892F      		mov r24,r25
+ 418 0298 9927      		clr r25
+ 419 029a 0895      		ret
+ 420               	/* epilogue: frame size=0 */
+ 421               	/* epilogue: noreturn */
+ 422               	/* epilogue end (size=0) */
+ 423               	/* function cm_char_rdy size 24 (24) */
+ 425               	.global	cm_read_char
+ 427               	cm_read_char:
+ 428               	/* prologue: frame size=0 */
+ 429               	/* prologue end (size=0) */
+ 430 029c E82F      		mov r30,r24
+ 431 029e FF27      		clr r31
+ 432 02a0 DF01      		movw r26,r30
+ 433 02a2 A050      		subi r26,lo8(-(gRtail))
+ 434 02a4 B040      		sbci r27,hi8(-(gRtail))
+ 435 02a6 8C91      		ld r24,X
+ 436 02a8 94E0      		ldi r25,4
+ 437 02aa EE0F      	1:	lsl r30
+ 438 02ac FF1F      		rol r31
+ 439 02ae 9A95      		dec r25
+ 440 02b0 E1F7      		brne 1b
+ 441 02b2 E80F      		add r30,r24
+ 442 02b4 F11D      		adc r31,__zero_reg__
+ 443 02b6 E050      		subi r30,lo8(-(gRring))
+ 444 02b8 F040      		sbci r31,hi8(-(gRring))
+ 445 02ba 8F5F      		subi r24,lo8(-(1))
+ 446 02bc 8C93      		st X,r24
+ 447 02be E081      		ld r30,Z
+ 448 02c0 8C91      		ld r24,X
+ 449 02c2 8031      		cpi r24,lo8(16)
+ 450 02c4 08F0      		brlo .L31
+ 451 02c6 1C92      		st X,__zero_reg__
+ 452               	.L31:
+ 453 02c8 8E2F      		mov r24,r30
+ 454 02ca 9927      		clr r25
+ 455               	/* epilogue: frame size=0 */
+ 456 02cc 0895      		ret
+ 457               	/* epilogue end (size=1) */
+ 458               	/* function cm_read_char size 25 (24) */
+ 460               	.global	cm_rcv_disable
+ 462               	cm_rcv_disable:
+ 463               	/* prologue: frame size=0 */
+ 464               	/* prologue end (size=0) */
+ 465 02ce E0E0      		ldi r30,lo8(gRcvrEnabled)
+ 466 02d0 F0E0      		ldi r31,hi8(gRcvrEnabled)
+ 467 02d2 E80F      		add r30,r24
+ 468 02d4 F11D      		adc r31,__zero_reg__
+ 469 02d6 1082      		st Z,__zero_reg__
+ 470               	/* epilogue: frame size=0 */
+ 471 02d8 0895      		ret
+ 472               	/* epilogue end (size=1) */
+ 473               	/* function cm_rcv_disable size 6 (5) */
+ 475               		.lcomm ringNdx.0,3
+ 476               		.lcomm irqcnt.1,3
+ 477               		.lcomm rcving.2,3
+ 478               		.lcomm bittime.3,3
+ 479               		.lcomm rcvbyte.4,3
+ 480               	.global	__vector_7
+ 482               	__vector_7:
+ 483               	/* prologue: frame size=0 */
+ 484 02da 1F92      		push __zero_reg__
+ 485 02dc 0F92      		push __tmp_reg__
+ 486 02de 0FB6      		in __tmp_reg__,__SREG__
+ 487 02e0 0F92      		push __tmp_reg__
+ 488 02e2 1124      		clr __zero_reg__
+ 489 02e4 FF92      		push r15
+ 490 02e6 0F93      		push r16
+ 491 02e8 1F93      		push r17
+ 492 02ea 2F93      		push r18
+ 493 02ec 3F93      		push r19
+ 494 02ee 4F93      		push r20
+ 495 02f0 5F93      		push r21
+ 496 02f2 6F93      		push r22
+ 497 02f4 7F93      		push r23
+ 498 02f6 8F93      		push r24
+ 499 02f8 9F93      		push r25
+ 500 02fa AF93      		push r26
+ 501 02fc BF93      		push r27
+ 502 02fe CF93      		push r28
+ 503 0300 DF93      		push r29
+ 504 0302 EF93      		push r30
+ 505 0304 FF93      		push r31
+ 506               	/* prologue end (size=22) */
+ 507 0306 FF24      		clr r15
+ 508 0308 8091 0000 		lds r24,gPortsOpen
+ 509 030c F816      		cp r15,r24
+ 510 030e 08F0      		brlo .+2
+ 511 0310 2EC1      		rjmp .L65
+ 512 0312 01E0      		ldi r16,lo8(1)
+ 513 0314 10E0      		ldi r17,hi8(1)
+ 514               	.L63:
+ 515 0316 AF2D      		mov r26,r15
+ 516 0318 BB27      		clr r27
+ 517 031a ED01      		movw r28,r26
+ 518 031c C050      		subi r28,lo8(-(irqcnt.1))
+ 519 031e D040      		sbci r29,hi8(-(irqcnt.1))
+ 520 0320 8881      		ld r24,Y
+ 521 0322 8F5F      		subi r24,lo8(-(1))
+ 522 0324 8883      		st Y,r24
+ 523 0326 9881      		ld r25,Y
+ 524 0328 BD01      		movw r22,r26
+ 525 032a 6050      		subi r22,lo8(-(gBaudRate))
+ 526 032c 7040      		sbci r23,hi8(-(gBaudRate))
+ 527 032e FB01      		movw r30,r22
+ 528 0330 8081      		ld r24,Z
+ 529 0332 9817      		cp r25,r24
+ 530 0334 08F0      		brlo .L37
+ 531 0336 1882      		st Y,__zero_reg__
+ 532               	.L37:
+ 533 0338 FD01      		movw r30,r26
+ 534 033a E050      		subi r30,lo8(-(gRcvrEnabled))
+ 535 033c F040      		sbci r31,hi8(-(gRcvrEnabled))
+ 536 033e E081      		ld r30,Z
+ 537 0340 AD01      		movw r20,r26
+ 538 0342 4050      		subi r20,lo8(-(rcving.2))
+ 539 0344 5040      		sbci r21,hi8(-(rcving.2))
+ 540 0346 EE23      		tst r30
+ 541 0348 09F4      		brne .+2
+ 542 034a 6BC0      		rjmp .L38
+ 543 034c FA01      		movw r30,r20
+ 544 034e 8081      		ld r24,Z
+ 545 0350 8823      		tst r24
+ 546 0352 E1F1      		breq .L39
+ 547 0354 FD01      		movw r30,r26
+ 548 0356 E050      		subi r30,lo8(-(bittime.3))
+ 549 0358 F040      		sbci r31,hi8(-(bittime.3))
+ 550 035a 9881      		ld r25,Y
+ 551 035c 8081      		ld r24,Z
+ 552 035e 9817      		cp r25,r24
+ 553 0360 09F0      		breq .+2
+ 554 0362 61C0      		rjmp .L49
+ 555 0364 ED01      		movw r28,r26
+ 556 0366 C050      		subi r28,lo8(-(rcvbyte.4))
+ 557 0368 D040      		sbci r29,hi8(-(rcvbyte.4))
+ 558 036a 8881      		ld r24,Y
+ 559 036c 8695      		lsr r24
+ 560 036e 8883      		st Y,r24
+ 561 0370 86B1      		in r24,38-0x20
+ 562 0372 9927      		clr r25
+ 563 0374 FD01      		movw r30,r26
+ 564 0376 E050      		subi r30,lo8(-(gPortBit))
+ 565 0378 F040      		sbci r31,hi8(-(gPortBit))
+ 566 037a 2081      		ld r18,Z
+ 567 037c 02C0      		rjmp 2f
+ 568 037e 9595      	1:	asr r25
+ 569 0380 8795      		ror r24
+ 570 0382 2A95      	2:	dec r18
+ 571 0384 E2F7      		brpl 1b
+ 572 0386 80FF      		sbrs r24,0
+ 573 0388 03C0      		rjmp .L41
+ 574 038a 8881      		ld r24,Y
+ 575 038c 8068      		ori r24,lo8(-128)
+ 576 038e 8883      		st Y,r24
+ 577               	.L41:
+ 578 0390 FA01      		movw r30,r20
+ 579 0392 8081      		ld r24,Z
+ 580 0394 8F5F      		subi r24,lo8(-(1))
+ 581 0396 8083      		st Z,r24
+ 582 0398 8081      		ld r24,Z
+ 583 039a 8A30      		cpi r24,lo8(10)
+ 584 039c 0CF4      		brge .+2
+ 585 039e 43C0      		rjmp .L49
+ 586 03a0 1082      		st Z,__zero_reg__
+ 587 03a2 FD01      		movw r30,r26
+ 588 03a4 E050      		subi r30,lo8(-(gRhead))
+ 589 03a6 F040      		sbci r31,hi8(-(gRhead))
+ 590 03a8 8081      		ld r24,Z
+ 591 03aa 24E0      		ldi r18,4
+ 592 03ac AA0F      	1:	lsl r26
+ 593 03ae BB1F      		rol r27
+ 594 03b0 2A95      		dec r18
+ 595 03b2 E1F7      		brne 1b
+ 596 03b4 A80F      		add r26,r24
+ 597 03b6 B11D      		adc r27,__zero_reg__
+ 598 03b8 A050      		subi r26,lo8(-(gRring))
+ 599 03ba B040      		sbci r27,hi8(-(gRring))
+ 600 03bc 9881      		ld r25,Y
+ 601 03be 9C93      		st X,r25
+ 602 03c0 8F5F      		subi r24,lo8(-(1))
+ 603 03c2 8083      		st Z,r24
+ 604 03c4 8081      		ld r24,Z
+ 605 03c6 8031      		cpi r24,lo8(16)
+ 606 03c8 70F1      		brlo .L49
+ 607 03ca 29C0      		rjmp .L69
+ 608               	.L39:
+ 609 03cc 86B1      		in r24,38-0x20
+ 610 03ce 9927      		clr r25
+ 611 03d0 FD01      		movw r30,r26
+ 612 03d2 E050      		subi r30,lo8(-(gPortBit))
+ 613 03d4 F040      		sbci r31,hi8(-(gPortBit))
+ 614 03d6 2081      		ld r18,Z
+ 615 03d8 02C0      		rjmp 2f
+ 616 03da 9595      	1:	asr r25
+ 617 03dc 8795      		ror r24
+ 618 03de 2A95      	2:	dec r18
+ 619 03e0 E2F7      		brpl 1b
+ 620 03e2 8170      		andi r24,lo8(1)
+ 621 03e4 9070      		andi r25,hi8(1)
+ 622 03e6 8017      		cp r24,r16
+ 623 03e8 9107      		cpc r25,r17
+ 624 03ea E9F0      		breq .L49
+ 625 03ec FD01      		movw r30,r26
+ 626 03ee E050      		subi r30,lo8(-(bittime.3))
+ 627 03f0 F040      		sbci r31,hi8(-(bittime.3))
+ 628 03f2 DB01      		movw r26,r22
+ 629 03f4 9C91      		ld r25,X
+ 630 03f6 9695      		lsr r25
+ 631 03f8 8881      		ld r24,Y
+ 632 03fa 890F      		add r24,r25
+ 633               	.L68:
+ 634 03fc 8083      		st Z,r24
+ 635 03fe 9081      		ld r25,Z
+ 636 0400 8C91      		ld r24,X
+ 637 0402 9817      		cp r25,r24
+ 638 0404 20F0      		brlo .L67
+ 639 0406 8081      		ld r24,Z
+ 640 0408 9C91      		ld r25,X
+ 641 040a 891B      		sub r24,r25
+ 642 040c F7CF      		rjmp .L68
+ 643               	.L67:
+ 644 040e EF2D      		mov r30,r15
+ 645 0410 FF27      		clr r31
+ 646 0412 DF01      		movw r26,r30
+ 647 0414 A050      		subi r26,lo8(-(rcving.2))
+ 648 0416 B040      		sbci r27,hi8(-(rcving.2))
+ 649 0418 0C93      		st X,r16
+ 650 041a E050      		subi r30,lo8(-(rcvbyte.4))
+ 651 041c F040      		sbci r31,hi8(-(rcvbyte.4))
+ 652               	.L69:
+ 653 041e 1082      		st Z,__zero_reg__
+ 654 0420 02C0      		rjmp .L49
+ 655               	.L38:
+ 656 0422 DA01      		movw r26,r20
+ 657 0424 EC93      		st X,r30
+ 658               	.L49:
+ 659 0426 CF2D      		mov r28,r15
+ 660 0428 DD27      		clr r29
+ 661 042a FE01      		movw r30,r28
+ 662 042c E050      		subi r30,lo8(-(irqcnt.1))
+ 663 042e F040      		sbci r31,hi8(-(irqcnt.1))
+ 664 0430 8081      		ld r24,Z
+ 665 0432 8823      		tst r24
+ 666 0434 09F0      		breq .+2
+ 667 0436 95C0      		rjmp .L36
+ 668 0438 AE01      		movw r20,r28
+ 669 043a 4050      		subi r20,lo8(-(gXmtState))
+ 670 043c 5040      		sbci r21,hi8(-(gXmtState))
+ 671 043e FA01      		movw r30,r20
+ 672 0440 8081      		ld r24,Z
+ 673 0442 282F      		mov r18,r24
+ 674 0444 3327      		clr r19
+ 675 0446 2230      		cpi r18,2
+ 676 0448 3105      		cpc r19,__zero_reg__
+ 677 044a 09F1      		breq .L53
+ 678 044c 2330      		cpi r18,3
+ 679 044e 3105      		cpc r19,__zero_reg__
+ 680 0450 24F4      		brge .L62
+ 681 0452 2130      		cpi r18,1
+ 682 0454 3105      		cpc r19,__zero_reg__
+ 683 0456 31F0      		breq .L52
+ 684 0458 84C0      		rjmp .L36
+ 685               	.L62:
+ 686 045a 2330      		cpi r18,3
+ 687 045c 3105      		cpc r19,__zero_reg__
+ 688 045e 09F4      		brne .+2
+ 689 0460 48C0      		rjmp .L58
+ 690 0462 7FC0      		rjmp .L36
+ 691               	.L52:
+ 692 0464 FE01      		movw r30,r28
+ 693 0466 E050      		subi r30,lo8(-(gPortBit))
+ 694 0468 F040      		sbci r31,hi8(-(gPortBit))
+ 695 046a 8081      		ld r24,Z
+ 696 046c 02C0      		rjmp 2f
+ 697 046e 220F      	1:	lsl r18
+ 698 0470 331F      		rol r19
+ 699 0472 8A95      	2:	dec r24
+ 700 0474 E2F7      		brpl 1b
+ 701 0476 922F      		mov r25,r18
+ 702 0478 9095      		com r25
+ 703 047a 85B1      		in r24,37-0x20
+ 704 047c 8923      		and r24,r25
+ 705 047e 85B9      		out 37-0x20,r24
+ 706 0480 82E0      		ldi r24,lo8(2)
+ 707 0482 DA01      		movw r26,r20
+ 708 0484 8C93      		st X,r24
+ 709 0486 C050      		subi r28,lo8(-(gBitnum))
+ 710 0488 D040      		sbci r29,hi8(-(gBitnum))
+ 711 048a 0883      		st Y,r16
+ 712 048c 6AC0      		rjmp .L36
+ 713               	.L53:
+ 714 048e FE01      		movw r30,r28
+ 715 0490 E050      		subi r30,lo8(-(gUartXmt))
+ 716 0492 F040      		sbci r31,hi8(-(gUartXmt))
+ 717 0494 DE01      		movw r26,r28
+ 718 0496 A050      		subi r26,lo8(-(gBitnum))
+ 719 0498 B040      		sbci r27,hi8(-(gBitnum))
+ 720 049a 8081      		ld r24,Z
+ 721 049c 9C91      		ld r25,X
+ 722 049e 8923      		and r24,r25
+ 723 04a0 FE01      		movw r30,r28
+ 724 04a2 E050      		subi r30,lo8(-(gPortBit))
+ 725 04a4 F040      		sbci r31,hi8(-(gPortBit))
+ 726 04a6 8823      		tst r24
+ 727 04a8 51F0      		breq .L54
+ 728 04aa 8081      		ld r24,Z
+ 729 04ac 9801      		movw r18,r16
+ 730 04ae 02C0      		rjmp 2f
+ 731 04b0 220F      	1:	lsl r18
+ 732 04b2 331F      		rol r19
+ 733 04b4 8A95      	2:	dec r24
+ 734 04b6 E2F7      		brpl 1b
+ 735 04b8 85B1      		in r24,37-0x20
+ 736 04ba 822B      		or r24,r18
+ 737 04bc 0BC0      		rjmp .L70
+ 738               	.L54:
+ 739 04be 8081      		ld r24,Z
+ 740 04c0 F801      		movw r30,r16
+ 741 04c2 02C0      		rjmp 2f
+ 742 04c4 EE0F      	1:	lsl r30
+ 743 04c6 FF1F      		rol r31
+ 744 04c8 8A95      	2:	dec r24
+ 745 04ca E2F7      		brpl 1b
+ 746 04cc 9E2F      		mov r25,r30
+ 747 04ce 9095      		com r25
+ 748 04d0 85B1      		in r24,37-0x20
+ 749 04d2 8923      		and r24,r25
+ 750               	.L70:
+ 751 04d4 85B9      		out 37-0x20,r24
+ 752 04d6 FE01      		movw r30,r28
+ 753 04d8 E050      		subi r30,lo8(-(gBitnum))
+ 754 04da F040      		sbci r31,hi8(-(gBitnum))
+ 755 04dc 8081      		ld r24,Z
+ 756 04de 87FF      		sbrs r24,7
+ 757 04e0 05C0      		rjmp .L56
+ 758 04e2 C050      		subi r28,lo8(-(gXmtState))
+ 759 04e4 D040      		sbci r29,hi8(-(gXmtState))
+ 760 04e6 83E0      		ldi r24,lo8(3)
+ 761 04e8 8883      		st Y,r24
+ 762 04ea 3BC0      		rjmp .L36
+ 763               	.L56:
+ 764 04ec 8081      		ld r24,Z
+ 765 04ee 880F      		lsl r24
+ 766 04f0 37C0      		rjmp .L71
+ 767               	.L58:
+ 768 04f2 FE01      		movw r30,r28
+ 769 04f4 E050      		subi r30,lo8(-(gPortBit))
+ 770 04f6 F040      		sbci r31,hi8(-(gPortBit))
+ 771 04f8 8081      		ld r24,Z
+ 772 04fa 9801      		movw r18,r16
+ 773 04fc 02C0      		rjmp 2f
+ 774 04fe 220F      	1:	lsl r18
+ 775 0500 331F      		rol r19
+ 776 0502 8A95      	2:	dec r24
+ 777 0504 E2F7      		brpl 1b
+ 778 0506 85B1      		in r24,37-0x20
+ 779 0508 822B      		or r24,r18
+ 780 050a 85B9      		out 37-0x20,r24
+ 781 050c FE01      		movw r30,r28
+ 782 050e E050      		subi r30,lo8(-(gBitnum))
+ 783 0510 F040      		sbci r31,hi8(-(gBitnum))
+ 784 0512 91E0      		ldi r25,lo8(1)
+ 785 0514 9083      		st Z,r25
+ 786 0516 9E01      		movw r18,r28
+ 787 0518 2050      		subi r18,lo8(-(gXringNdx))
+ 788 051a 3040      		sbci r19,hi8(-(gXringNdx))
+ 789 051c D901      		movw r26,r18
+ 790 051e 8C91      		ld r24,X
+ 791 0520 DE01      		movw r26,r28
+ 792 0522 A050      		subi r26,lo8(-(ringNdx.0))
+ 793 0524 B040      		sbci r27,hi8(-(ringNdx.0))
+ 794 0526 8823      		tst r24
+ 795 0528 C9F0      		breq .L59
+ 796 052a FE01      		movw r30,r28
+ 797 052c EC0F      		add r30,r28
+ 798 052e FD1F      		adc r31,r29
+ 799 0530 E050      		subi r30,lo8(-(gXring))
+ 800 0532 F040      		sbci r31,hi8(-(gXring))
+ 801 0534 8C91      		ld r24,X
+ 802 0536 0190      		ld __tmp_reg__,Z+
+ 803 0538 F081      		ld r31,Z
+ 804 053a E02D      		mov r30,__tmp_reg__
+ 805 053c E80F      		add r30,r24
+ 806 053e F11D      		adc r31,__zero_reg__
+ 807 0540 8081      		ld r24,Z
+ 808 0542 C050      		subi r28,lo8(-(gUartXmt))
+ 809 0544 D040      		sbci r29,hi8(-(gUartXmt))
+ 810 0546 8883      		st Y,r24
+ 811 0548 8C91      		ld r24,X
+ 812 054a 890F      		add r24,r25
+ 813 054c 8C93      		st X,r24
+ 814 054e FA01      		movw r30,r20
+ 815 0550 9083      		st Z,r25
+ 816 0552 D901      		movw r26,r18
+ 817 0554 8C91      		ld r24,X
+ 818 0556 8150      		subi r24,lo8(-(-1))
+ 819 0558 8C93      		st X,r24
+ 820 055a 03C0      		rjmp .L36
+ 821               	.L59:
+ 822 055c 8C93      		st X,r24
+ 823 055e FA01      		movw r30,r20
+ 824               	.L71:
+ 825 0560 8083      		st Z,r24
+ 826               	.L36:
+ 827 0562 F394      		inc r15
+ 828 0564 8091 0000 		lds r24,gPortsOpen
+ 829 0568 F816      		cp r15,r24
+ 830 056a 08F4      		brsh .+2
+ 831 056c D4CE      		rjmp .L63
+ 832               	.L65:
+ 833               	/* epilogue: frame size=0 */
+ 834 056e FF91      		pop r31
+ 835 0570 EF91      		pop r30
+ 836 0572 DF91      		pop r29
+ 837 0574 CF91      		pop r28
+ 838 0576 BF91      		pop r27
+ 839 0578 AF91      		pop r26
+ 840 057a 9F91      		pop r25
+ 841 057c 8F91      		pop r24
+ 842 057e 7F91      		pop r23
+ 843 0580 6F91      		pop r22
+ 844 0582 5F91      		pop r21
+ 845 0584 4F91      		pop r20
+ 846 0586 3F91      		pop r19
+ 847 0588 2F91      		pop r18
+ 848 058a 1F91      		pop r17
+ 849 058c 0F91      		pop r16
+ 850 058e FF90      		pop r15
+ 851 0590 0F90      		pop __tmp_reg__
+ 852 0592 0FBE      		out __SREG__,__tmp_reg__
+ 853 0594 0F90      		pop __tmp_reg__
+ 854 0596 1F90      		pop __zero_reg__
+ 855 0598 1895      		reti
+ 856               	/* epilogue end (size=22) */
+ 857               	/* function __vector_7 size 358 (314) */
+ 859               		.lcomm gXring,6
+ 860               		.lcomm gUartXmt,3
+ 861               		.lcomm gRring,48
+ 862               	/* File "cm9600.c": code  739 = 0x02e3 ( 676), prologues  28, epilogues  35 */
+DEFINED SYMBOLS
+                            *ABS*:00000000 cm9600.c
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:3      *ABS*:0000003f __SREG__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:4      *ABS*:0000003e __SP_H__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:5      *ABS*:0000003d __SP_L__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:6      *ABS*:00000000 __tmp_reg__
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:7      *ABS*:00000001 __zero_reg__
+                             .bss:00000000 gXringNdx
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:14     .data:00000000 gBitnum
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:10     .bss:00000003 gXmtState
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:18     .bss:00000006 gRhead
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:19     .bss:00000009 gPortBit
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:23     .data:00000003 gRcvrEnabled
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:20     .bss:0000000c gBaudRate
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:27     .bss:0000000f gPortsOpen
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:28     .bss:00000010 gRtail
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:33     .text:00000000 cm_rcv_enable
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:49     .text:0000000e cm_init_UART
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:248    .text:000001ac cm_UART_busy
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:271    .text:000001c6 cm_ByteXmt
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:859    .bss:00000028 gUartXmt
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:316    .text:000001fc cm_send_line
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:479    .bss:00000022 gXring
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:392    .text:0000026c cm_char_rdy
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:427    .text:0000029c cm_read_char
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:860    .bss:0000002b gRring
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:462    .text:000002ce cm_rcv_disable
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:29     .bss:00000013 ringNdx.0
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:475    .bss:00000016 irqcnt.1
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:476    .bss:00000019 rcving.2
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:477    .bss:0000001c bittime.3
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:478    .bss:0000001f rcvbyte.4
+C:\DOCUME~1\Kevin\LOCALS~1\Temp/ccW2aaaa.s:482    .text:000002da __vector_7
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss

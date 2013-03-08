@@ -1,0 +1,2 @@
+This project uses a wireless router running the openwrt linux distribution to control the iRobot create.  The openwrt box is connected via a serial port to the command module, and is optionally controlled by the Java GUI which connections over the wireless network.
+
